@@ -1,3 +1,7 @@
+# OS helper includes
+linclude
+.vscode
+
 # Prerequisites
 *.d
 
