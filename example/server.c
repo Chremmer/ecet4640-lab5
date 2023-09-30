@@ -24,6 +24,21 @@ char *strupr(char * text)
 	return text;
 }
 
+/*
+	From the man pages: (https://www.man7.org/linux/man-pages/man7/ip.7.html)
+
+	struct sockaddr_in {
+               sa_family_t    sin_family; // address family: AF_INET 
+               in_port_t      sin_port;   // port in network byte order 
+               struct in_addr sin_addr;   // internet address 
+           };
+
+           // Internet address 
+           struct in_addr {
+               uint32_t       s_addr;     // address in network byte order 
+           };
+*/
+
 int main(int argc, char *argv[])
 {
     int servSock = 0, clntSock = 0;
@@ -41,7 +56,9 @@ int main(int argc, char *argv[])
     memset(&serv_addr, '0', sizeof(serv_addr));
     memset(sendBuff, '0', sizeof(sendBuff)); 
 
+	// in_family is *always* AF_INET
     serv_addr.sin_family = AF_INET;
+	// The address seems to be the IP address, converted to its underlying numeric value. 
     serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     serv_addr.sin_port = htons(PORT); 
 

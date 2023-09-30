@@ -5,6 +5,7 @@
  * \brief This module contains functions that interact with files.
  * @{
 */
+#include <stdio.h>
 #include "map.h"
 
 // ~~~~ Macros ~~~~ //
@@ -33,11 +34,23 @@
 short FileStatus(char * filename);
 
 /**
+ * Will call fopen() on a file and put default data inside, or nothing if defaultContents is NULL. Will print the results of its attempt.
+ * @warning Does not close the file; returns the open file.
+ * @note Prints successes and errors.
+ * @param filename The file name to create or open.
+ * @param defaultContents The contents to put in the file, if creating a default file, or NULL if no contents should be added.
+ * @returns The opened file, or NULL on failure. 
+*/
+FILE * CreateOrOpenFileVerbose(char * filename, char * defaultContents);
+
+/**
  * Reads the registered file into the user's map, by checking the IDs in the first field and setting the data at that location.
+ * @note Prints warnings and errors.
  * @param reg_file The registered users file.
  * @param users_map The user's map to read into.
+ * @returns 0 if success, error code if there was an error.
 */
-void ReadRegisteredFileIntoUsersMap(FILE * reg_file, map * users_map);
+int ReadRegisteredFileIntoUsersMap(FILE * reg_file, map * users_map);
 /**
  * @}
 */

@@ -10,18 +10,31 @@
 #define COLOR_RED "\e[38;2;255;75;75m"
 /** A VTE for green. */
 #define COLOR_GREEN "\e[38;2;0;240;0m"
+/** A VTE for yellow. */
+#define COLOR_YELLOW "\e[38;2;255;255;0m"
 /** A VTE to reset the printing color. */
 #define COLOR_RESET "\e[0m"
 
 /**
- * Prints to the console in red
+ * Prints to the console in red.
+ * @param format A format, as printf.
+ * @param ... args, as printf.
 */
 void printRed(const char * format, ...);
 
 /**
- * Prints to the console in green
+ * Prints to the console in green.
+ * @param format A format, as printf.
+ * @param ... args, as printf.
 */
 void printGreen(const char * format, ...);
+
+/**
+ * Prints to the console in yellow.
+ * @param format A format, as printf.
+ * @param ... args, as printf.
+*/
+void printYellow(const char * format, ...);
 
 
 /**
