@@ -19,7 +19,6 @@
 
 ServerProperties server;
 Connection * connections;
-short server_running;
 
 // A private function just for reading the settings map into the server struct and printing warnings as necessary.
 void _readSettingsMapIntoServerStruct(map * server_settings) {
@@ -44,9 +43,9 @@ void _readSettingsMapIntoServerStruct(map * server_settings) {
         int found_sb_size = atoi(result.data);
         if(found_sb_size <= 0) {
             printYellow("Invalid send_buffer_size setting: %s. Defaulting to 1024.\n", result.data);
-            server.send_buffer_size = 1024;
+            server.send_buffer_size = 1024 * sizeof(char);
         } else {
-            server.send_buffer_size = found_sb_size;
+            server.send_buffer_size = found_sb_size * sizeof(char);
         }
     }
     result = Map_Get(server_settings, "receive_buffer_size");
@@ -57,9 +56,9 @@ void _readSettingsMapIntoServerStruct(map * server_settings) {
         int found_rb_size = atoi(result.data);
         if(found_rb_size <= 0) {
             printYellow("Invalid receive_buffer_size setting: %s. Defaulting to 1024.\n", result.data);
-            server.receive_buffer_size = 1024;
+            server.receive_buffer_size = 1024 * sizeof(char);
         } else {
-            server.receive_buffer_size = found_rb_size;
+            server.receive_buffer_size = found_rb_size * sizeof(char);
         }
     }
     result = Map_Get(server_settings, "backlog");
@@ -95,9 +94,8 @@ int InitializeServer(map * server_settings) {
     connections = malloc(server.max_connections * sizeof(Connection));
     int i;
     for(i=0; i < server.max_connections; i++) {
-        connections[i].active = 0;
+        connections[i].status = ConnectionStatus_CLOSED;
     }
-    server_running = 0;
     printGreen("Server initialized with %d max connections.\n", server.max_connections);
     return 1;
 }
@@ -117,20 +115,27 @@ int StartServer(map * users_map) {
     // Assign a name to the socket.
     int bind_error = bind(serverSocket, (struct sockaddr*)&server_address, sizeof(server_address));
     if(bind_error) {
-        printRed("Error binding the server to port %u.\n",server.port);
+        printRed("Error binding the server to port %d.\n", ntohs(server.port));
         perror("Bind Error:");
         return 0;
     }
-    server_running = 1;
+    // Initialized a shared space that will be used across threads.
+    ClientShared * shared = InitializeShared(users_map, server.send_buffer_size, server.receive_buffer_size);
+    // The update thread is responsible for checking if there is 'dirty' data that should be saved to the registered user's file.
+    pthread_t registered_update_thread;
+    pthread_create(&registered_update_thread, NULL, StartUpdateThread, NULL);
     printBlue("Server listening on port: %d\n", ntohs(server.port));
+    // begin listening according to the socket settings
     listen(serverSocket, server.backlog);
-    while(server_running) {
+    while(!shared->shutting_down) {
+        // Get an available connection.
         Connection * next_client = NextAvailableConnection();
         if(next_client == NULL) {
             printYellow("Server connections are maxxed.\n");
             sleep(1);
             continue;
         }
+        // Accept a connection.
         next_client->address_length = sizeof(next_client->address);
         next_client->socket = accept(serverSocket, (struct sockaddr *)&(next_client->address), &(next_client->address_length));
         if(next_client->socket < 0)
@@ -140,6 +145,8 @@ int StartServer(map * users_map) {
             continue;
         }
         printBlue("New client connection from IP: %s\n", inet_ntoa(next_client->address.sin_addr));
+        next_client->status = ConnectionStatus_ACTIVE;
+        // Start a thread to handle communication from that connection.
         pthread_create(&(next_client->thread_id), NULL, StartConnectionThread, next_client);
     }
 
@@ -150,7 +157,7 @@ Connection * NextAvailableConnection()
 {
     int i;
     for(i = 0; i < server.max_connections; i++) {
-        if(!connections[i].active)
+        if(connections[i].status == ConnectionStatus_CLOSED)
         {
             return &(connections[i]);
         }
