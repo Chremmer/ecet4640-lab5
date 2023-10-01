@@ -35,6 +35,15 @@ void printYellow(const char * format, ...) {
     printf(COLOR_RESET);
 }
 
+void printBlue(const char * format, ...) {
+    printf(COLOR_BLUE);
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    va_end(args);
+    printf(COLOR_RESET);
+}
+
 int RandomInteger(int min, int max)
 {
     int r_add = rand() % (max - min + 1);

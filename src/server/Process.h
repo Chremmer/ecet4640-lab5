@@ -17,6 +17,12 @@
 int Initialize();
 
 /**
+ * Runs the server.
+ * @returns 1 on success, otherwise 0.
+*/
+int RunCommand();
+
+/**
  * @}
 */
 

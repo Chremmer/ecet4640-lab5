@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <time.h>
 #include "Map.h"
+#include "Connection.h"
 
 /**
  * Defines the properties for the server.
@@ -47,6 +48,13 @@ int InitializeServer();
  * @returns 1 if the server ran and shutdown gracefully, 0 if there was an error during setup.
 */
 int StartServer(map * users_map);
+
+/**
+ * Iterates through the Connections array until it finds one whose 'active' field is false and returns it.
+ * If it iterates through the array and fails to find a connection, it returns NULL.
+ * @returns A Connection struct or null.
+*/
+Connection * NextAvailableConnection();
 
 /**
  * @}

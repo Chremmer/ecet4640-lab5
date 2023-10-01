@@ -81,7 +81,21 @@ int Initialize() {
     return 1;
 }
 
-
+int RunCommand() {
+    int init_success = Initialize();
+    if(!init_success) {
+        printRed("Could not start the server due to failed initialization.\n");
+        return init_success;
+    }
+    printf("Running server.\n");
+    int server_success = StartServer(users_map);
+    if(!server_success) {
+        printRed("There was a problem running the server.\n");
+        return 0;
+    }
+    return 1;
+    
+}
 /**
  * @}
 */

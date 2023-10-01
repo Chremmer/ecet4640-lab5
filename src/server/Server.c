@@ -6,8 +6,11 @@
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 #include <linux/net.h>
 #include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
 
 #include "Server.h"
 #include "Connection.h"
@@ -28,7 +31,7 @@ void _readSettingsMapIntoServerStruct(map * server_settings) {
         int found_port = atoi(result.data);
         if(found_port <= 0) {
             printYellow("Invalid port setting: %s. Defaulting to 3000.\n", result.data);
-            server.port = 3000;
+            server.port = htons(3000);
         } else {
             server.port = htons(found_port);
         }
@@ -119,17 +122,41 @@ int StartServer(map * users_map) {
         return 0;
     }
     server_running = 1;
+    printBlue("Server listening on port: %d\n", ntohs(server.port));
+    listen(serverSocket, server.backlog);
     while(server_running) {
-        // check that we have an open connection
-        // if we do, accept a connection
-        // for that connection, load properties into Connection
-        // start a thread for Connection
-        // continue
+        Connection * next_client = NextAvailableConnection();
+        if(next_client == NULL) {
+            printYellow("Server connections are maxxed.\n");
+            sleep(1);
+            continue;
+        }
+        next_client->address_length = sizeof(next_client->address);
+        next_client->socket = accept(serverSocket, (struct sockaddr *)&(next_client->address), &(next_client->address_length));
+        if(next_client->socket < 0)
+        {
+            printRed("Failed to accept() client!\n");
+            sleep(1);
+            continue;
+        }
+        printBlue("New client connection from IP: %s\n", inet_ntoa(next_client->address.sin_addr));
+        pthread_create(&(next_client->thread_id), NULL, StartConnectionThread, next_client);
     }
 
     return 1;
 }
 
+Connection * NextAvailableConnection()
+{
+    int i;
+    for(i = 0; i < server.max_connections; i++) {
+        if(!connections[i].active)
+        {
+            return &(connections[i]);
+        }
+    }
+    return NULL;
+}
 
 
 /**

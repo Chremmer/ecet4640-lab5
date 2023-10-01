@@ -3,8 +3,8 @@
 #include "Process.h"
 
 int main() {
-    Initialize();
-    printRed("Server program executed.\n");
+    // Initialize();
+    RunCommand();
     return 0;
     
 }

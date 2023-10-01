@@ -110,7 +110,7 @@ $(O_DIR)/%.c.o: %.c
 
 # Build the server program executable (after building .o files)
 $(SERVER_OUTPUT_FILENAME): $(SERVER_OBJ_FILES)
-	$(CC) $(SERVER_OBJ_FILES) -o $@
+	$(CC) $(SERVER_OBJ_FILES) -lpthread -o $@
 
 # Build the client program executable (after building .o files)
 $(CLIENT_OUTPUT_FILENAME): $(CLIENT_OBJ_FILES)
