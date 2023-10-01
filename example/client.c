@@ -12,6 +12,8 @@
 #define RCVBUFSIZE 1024   /* Size of receive buffer */
 #define SNDBUFSIZE 1024   /* Size of receive buffer */
 
+#define IPS "127.0.0.1"
+
 char *strupr(char * text)
 {
 	int i, j=strlen(text);
@@ -39,7 +41,10 @@ int main(int argc, char *argv[])
     scanf("%d", &port);
 
 
-    strcpy(servIP, "192.168.112.1");             /* First arg: DRACO1 IP address (dotted quad) */
+    strcpy(servIP, IPS);             /* First arg: DRACO1 IP address (dotted quad) */
+
+    printf("Connecting to: %s.\n", IPS);
+
 
     if((servSock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {

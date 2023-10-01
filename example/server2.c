@@ -72,7 +72,9 @@ int main(int argc, char *argv[])
 	// marks socket as a passive socket, that will be used to accept incoming connections with accept. The second parameter is the backlog. Sets errno on fail.
 	listen(servSock, 10);
 
-	
+	printf("127.0.0.1 = %i\n",inet_addr("127.0.0.1"));
+	printf("INADDR_ANY = %s\n", inet_ntoa(serv_addr.sin_addr));
+
     for (;;) /* Run forever */
     {
         /* Set the size of the in-out parameter */

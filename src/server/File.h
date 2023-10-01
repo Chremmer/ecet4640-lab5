@@ -25,6 +25,18 @@
 */
 #define REGISTERED_FILE "registered.txt"
 
+/**
+ * Contains settings for the server. 
+ * Each setting row contains a key, 0 or more space, an '=' symbol, and a value.
+ * Valid keys:
+ * @note port; the port the server will listen on.
+ * @note send_buffer_size; the size of the send buffer
+ * @note receive_buffer_size; the size of the receive buffer
+ * @note backlog; the quantity of allowed backlogged unprocessed connections.
+ * @todo Create file functions for this.
+*/
+#define SERVER_SETTINGS_FILE "server-settings.txt"
+
 // ~~~~~ General File Functions ~~~~~ //
 
 /**
@@ -51,6 +63,11 @@ FILE * CreateOrOpenFileVerbose(char * filename, char * defaultContents);
  * @returns 0 if success, error code if there was an error.
 */
 int ReadRegisteredFileIntoUsersMap(FILE * reg_file, map * users_map);
+
+
+
+
+
 /**
  * @}
 */

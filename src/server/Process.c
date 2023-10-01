@@ -8,6 +8,7 @@
 #include "map.h"
 #include "File.h"
 #include "Util.h"
+#include "Server.h"
 
 /** The array of users. This will be populated on initialize by functions in Build. */
 User * users_array;
@@ -42,6 +43,13 @@ int Initialize() {
         return 0;
     }
     printGreen("Loaded %s into users map.\n", REGISTERED_FILE);
+    printf("Initializing server.\n");
+    int server_initialized = InitializeServer();
+    if(!server_initialized) {
+        printRed("Failed to initialize server.\n");
+        return 0;
+    }
+
     return 1;
 }
 

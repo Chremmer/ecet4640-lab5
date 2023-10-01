@@ -132,4 +132,7 @@ clean:
 	rm -f $(TESTOUTFILE)
 	rm -f $(SERVER_OUTPUT_FILENAME)
 	rm -f $(CLIENT_OUTPUT_FILENAME)
+	rm example/client
+	rm example/server
+	rm example/server2
 	
