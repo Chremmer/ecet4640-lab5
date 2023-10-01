@@ -9,13 +9,13 @@
  * @todo Be able to set log levels
 */
 
-void logfError(const char * format, ...);
+void LogfError(const char * format, ...);
 
-void logfSuccess(const char * format, ...);
+void LogfSuccess(const char * format, ...);
 
-void logfWarning(const char * format, ...);
+void LogfWarning(const char * format, ...);
 
-void log(const char * format, ...);
+void Log(const char * format, ...);
 
 /**
  * @}

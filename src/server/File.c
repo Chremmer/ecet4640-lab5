@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "File.h"
 #include "Data.h"
 #include "Util.h"
@@ -58,7 +59,10 @@ FILE * CreateOrOpenFileVerbose(char * filename, char * defaultContents) {
     if(status == 0) {
         printGreen("Created %s.\n", filename);
         if(defaultContents != NULL) {
+            fpos_t start_pos;
+            fgetpos(file, &start_pos);
             fprintf(file, defaultContents, 0);
+            fsetpos(file, &start_pos);
         }
     } else if(status == 1) {
         printGreen("Opened %s.\n", filename);
@@ -80,8 +84,6 @@ int ReadRegisteredFileIntoUsersMap(FILE * reg_file, map * users_map) {
     int line = 1;
 
     while( (scan_items = fscanf(reg_file, "%s\t%d\t%f\t%s\t%ld", userID, &user_age, &user_gpa, userLastIP, &lastConnection)) == 5) {
-        scan_items = fscanf(reg_file, "%s\t%d\t%f\t%s\t%ld", userID, &user_age, &user_gpa, userLastIP, &lastConnection);
-        line++;
         map_result result = Map_Get(users_map, userID);
         if(result.found == 0) {
             printYellow("Couldn't find user %s. Continuing read.\n", userID);
@@ -92,10 +94,36 @@ int ReadRegisteredFileIntoUsersMap(FILE * reg_file, map * users_map) {
         user->gpa = user_gpa;
         strcpy(user->ip, userLastIP);
         user->lastConnection = lastConnection;
+        line++;
     } 
 
     if(scan_items != EOF) {
         printRed("Error scanning registered file on line %d. Expected 5 items but had %d.\n", line, scan_items);
+        return 1;
+    }
+    return 0;
+}
+
+int ReadSettingsFileIntoSettingsMap(FILE * settings_file, map * settings_map) {
+    char key_read[100];
+    char value_read[100];
+
+    int scan_items;
+    int line = 1;
+
+    while( (scan_items = fscanf(settings_file, " %s = %s ", key_read, value_read)) == 2) {
+        char * key_alloc = malloc( (strlen(key_read)+1) * sizeof(char));
+        memset(key_alloc, 0, strlen(key_read)+1);
+        strcpy(key_alloc, key_read);
+        char * val_alloc = malloc( (strlen(value_read)+1) * sizeof(char));
+        memset(val_alloc, 0, strlen(value_read)+1);
+        strcpy(val_alloc, value_read);
+        Map_Set(settings_map, key_alloc, val_alloc);
+        line++;
+    }
+
+    if(scan_items != EOF) {
+        printRed("Error scanning settings file on line %d. Expected 2 items but had %d.\n", line, scan_items);
         return 1;
     }
     return 0;

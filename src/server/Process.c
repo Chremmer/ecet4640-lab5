@@ -14,6 +14,18 @@
 User * users_array;
 /** The map of userIDs to users. Populated on Initialize by functions in Build.*/
 map * users_map;
+/** The map of settings stored in the server settings file. */
+map * settings_map;
+/** The default contents of the settings file, if it doesn't exist. */
+char * default_settings = "port                = 3000\n"
+                          "send_buffer_size    = 1024\n"
+                          "receive_buffer_size = 1024\n"
+                          "backlog             = 10\n"
+                          "max_connections     = 20\n"
+                          "log_file            = log.txt\n"
+                          "log_level           = 1\n"
+                          "log_to_console      = true";
+
 /** The number of active clients.*/
 int active_clients;
 
@@ -43,8 +55,24 @@ int Initialize() {
         return 0;
     }
     printGreen("Loaded %s into users map.\n", REGISTERED_FILE);
+
+    printf("Reading settings file.\n");
+    settings_map = NewMap(50);
+    FILE * settings_file = CreateOrOpenFileVerbose(SERVER_SETTINGS_FILE, default_settings);
+    if(settings_file == NULL) {
+        printRed("Initialization failed during accessing of file: %s.\n", SERVER_SETTINGS_FILE);
+        return 0;
+    }
+    int settings_read_err = ReadSettingsFileIntoSettingsMap(settings_file, settings_map);
+    if(settings_read_err) {
+        printRed("Initialization failed while reading settings file %s. Correct this file or delete it so a default can be generated.\n", SERVER_SETTINGS_FILE);
+        return 0;
+    }
+    fclose(settings_file);
+    printGreen("Read %s.\n", SERVER_SETTINGS_FILE);
+
     printf("Initializing server.\n");
-    int server_initialized = InitializeServer();
+    int server_initialized = InitializeServer(settings_map);
     if(!server_initialized) {
         printRed("Failed to initialize server.\n");
         return 0;
@@ -52,6 +80,7 @@ int Initialize() {
 
     return 1;
 }
+
 
 /**
  * @}

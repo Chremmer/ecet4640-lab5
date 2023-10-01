@@ -58,12 +58,21 @@ FILE * CreateOrOpenFileVerbose(char * filename, char * defaultContents);
 /**
  * Reads the registered file into the user's map, by checking the IDs in the first field and setting the data at that location.
  * @note Prints warnings and errors.
- * @param reg_file The registered users file.
+ * @param reg_file The registered users file, open for reading.
  * @param users_map The user's map to read into.
  * @returns 0 if success, error code if there was an error.
 */
 int ReadRegisteredFileIntoUsersMap(FILE * reg_file, map * users_map);
 
+
+/**
+ * Reads the settings file into the settings map, by checking each line for a key value pair separated by a "=". It mallocs each key and value string it finds.
+ * @note Prints warnings and errors.
+ * @param settings_file The settings file, open for reading.
+ * @param users_map The settings_map to read into.
+ * @returns 0 if success, an error code if there was an error. 
+*/
+int ReadSettingsFileIntoSettingsMap(FILE * settings_file, map * settings_map);
 
 
 
