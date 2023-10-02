@@ -57,6 +57,8 @@ typedef struct
     char ip[IP_LENGTH];
     /// @brief A unix timestamp representing the last time a user connected.
     long lastConnection;
+    /// @brief Whether user has executed the 'register' command. 
+    short registered;
 } User;
 
 /**
