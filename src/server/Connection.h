@@ -119,7 +119,7 @@ int _register(Connection * connection, char* response);
  * @param response fills the response buffer with what to send to the client
  * @return int 1 if successful, 0 if not
  */
-int _help(Connection* connection, char* response);
+void _help(Connection* connection, char* response);
 
 /**
  * Disconnects the user from the server and sets values to appropiate state

@@ -29,9 +29,9 @@ void * StartUpdateThread(void * parameter)
 {
     while(shared.shutting_down == 0) {
         pthread_mutex_lock(&(shared.mutex));
-        sleep(1);
         shared.dirty = 0;
         pthread_mutex_unlock(&(shared.mutex));
+        sleep(1);
         // update the registered file 
 
     }
@@ -80,27 +80,28 @@ void * StartConnectionThread(void * p_connection)
         }
     } 
 
-    if(connection->state == ClientState_ACCESSING) {
+    if(connection->state == ClientState_ACCESSING && connection->status == ConnectionStatus_ACTIVE) {
         strcpy(send_buffer, "~Message~Say something, unregistered user!");
-    } else {
+    } else if (connection->state == ClientState_REGISTERED && connection->status == ConnectionStatus_ACTIVE) {
         strcpy(send_buffer, "~Message~Say something, registered user!");
     }
 
     while(connection->status == ConnectionStatus_ACTIVE)
     {
         if(connection->state == ClientState_ACCESSING) {
-            MessageOrClose(send_buffer, receive_buffer, connection);
 
-            if(strcmp(receive_buffer, "HELP")) {
+            MessageOrClose(send_buffer, receive_buffer, connection);
+            if(strcmp(receive_buffer, "HELP") == 0) {
                 _help(connection, send_buffer);
-            } else if(strcmp(receive_buffer, "EXIT")) {
+            } else if(strcmp(receive_buffer, "EXIT") == 0) {
                 _disconnect(connection, send_buffer); //I'm mixed on this being it's own functions
                 MessageAndClose(send_buffer, connection);
-            } else if(strcmp(receive_buffer, "REGISTER")) {
+            } else if(strcmp(receive_buffer, "REGISTER") == 0) {
                 _register(connection, send_buffer);
             } else {
                 strcpy(send_buffer, "invalid command, use HELP for list of commands");
             }
+            strcat(send_buffer, "\nInput Command:");
             // call a function for processing this state.
         } else if(connection->state == ClientState_REGISTERED)
         {
@@ -169,8 +170,8 @@ int _disconnect(Connection* connection, char* response) {
     return 0;
 }
 
-int _help(Connection* connection, char* response) {
-    if(connection->status == ClientState_REGISTERED) {
+void _help(Connection* connection, char* response) {
+    if(connection->status != ClientState_REGISTERED) {
         strcpy(response, "~Message~HELP - get a list of available commands\n");
         strcat(response, "REGISTER - register your user\n");
         strcat(response, "EXIT - disconnect from the server\n");
@@ -206,12 +207,12 @@ int _register(Connection * connection, char* response) {
 
     connection->state = ClientState_REGISTERED;
 
-    LogfInfo("%s has been restered.\n", connection->user->id);
+    //LogfInfo("%s has been restered.\n", connection->user->id);
 
     pthread_mutex_unlock(&(shared.mutex));
 
     strcpy(response, "~Message~");
-    strcat(response, connection->user);
+    strcat(response, connection->user->id);
     strcat(response, " was registered.\n");
 
     return 1;
