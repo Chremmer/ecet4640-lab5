@@ -27,13 +27,16 @@ typedef struct
 {
     /// @brief output the logger should go to
     FILE * ostream;
-    /// @brief minimum level that the log should be in order to ouput it
-    char outputLevel;
+    /// @brief minimum level that the log should be in order to print stdout
+    char printLevel;
+    /// @brief minimum level that the log should be for it to be printed to log file
+    char logLevel;
     /// @brief if not 0 will print to stdout as well as ostream
-    char printToStdOut;
+    char printAllToStdOut;
 
 } LogSettings;
 
+//set up functions that print to stdout no matter if printtostdout is set to true
 
 /**
  * @brief Logs at a FATAL level the formatted string and parameters of the string
@@ -88,9 +91,9 @@ void LogfTrace(const char * format, ...);
  * 
  * @param _printStream output stream to print at
  * @param outputLevel mimumum level needed to print to the printstream
- * @param printToStdOut will print everyting to stdout if not set to 0 as well as _printStream
+ * @param printAllToStdOut will print everyting to stdout if not set to 0 as well as _printStream
  */
-void InitializeLogger(FILE* _printStream, char outputLevel, char printToStdOut);
+void InitializeLogger(FILE* _printStream, char printLevel, char logLevel, char printAllToStdOut);
 
 
 /**

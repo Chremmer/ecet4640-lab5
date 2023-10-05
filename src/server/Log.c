@@ -2,24 +2,27 @@
  * \addtogroup Log
 */
 #include "Log.h"
+#include <stdarg.h>
 
 LogSettings L;
 
-void InitializeLogger(FILE* _printStream, char outputLevel, char printToStdOut) {
+void InitializeLogger(FILE* _printStream, char printLevel, char logLevel, char printAllToStdOut) {
     L.ostream = _printStream;
-    L.outputLevel = outputLevel;
-    L.printToStdOut = printToStdOut;
+    L.printLevel = printLevel;
+    L.logLevel = logLevel;
+    L.printAllToStdOut = printAllToStdOut;
 }
 
 void _logf(int level, const char * format, va_list argptr) {
 
-    // TODO add logic to include timestamp to the output
-    if(level >= L.outputLevel) {
-        vfprintf(L.ostream, format, argptr);
+    // TODO add logic to include timestamp to the 
+    // Stamp level to log
+    // if printing to standard out is used print with color based on level
+    if(level >= L.printLevel || L.printAllToStdOut != 0) {
+        vprintf(format, argptr);
     }
-
-    if(L.printToStdOut != 0) { //should only print if the output meets the required level as well?
-        vfprintf(stdout, format, argptr);
+    if(level >= L.logLevel) {
+        vfprintf(L.ostream, format, argptr);
     }
 }
 

@@ -102,6 +102,42 @@ void MessageAndClose(char * send_buffer, Connection * connection);
  * @returns NULL
 */
 void * StartUpdateThread(void * parameter);
+
+/**
+ * Registers the user from connection
+ * 
+ * @param connection connection the users is on
+ * @param response fills the response buffer with what to send to the client
+ * @return int 1 if successful, 0 if not
+ */
+int _register(Connection * connection, char* response);
+
+/**
+ * Returns the functions available to the user
+ * 
+ * @param connection connection the user is on
+ * @param response fills the response buffer with what to send to the client
+ * @return int 1 if successful, 0 if not
+ */
+int _help(Connection* connection, char* response);
+
+/**
+ * Disconnects the user from the server and sets values to appropiate state
+ * 
+ * @param connection connection the user is on
+ * @param response fills the response buffer with what to send to the client
+ * @return int 1 if successful, 0 if not
+ */
+int _disconnect(Connection* connection, char* response);
+
+/**
+ * Returns the info of the user to the client
+ * 
+ * @param connection connection the user is on
+ * @param response fills the response buffer with what to send to the client
+ * @return int 1 if successful, 0 if not
+ */
+int _myinfo(Connection* connection, char* response);
 /**
  * @}
 */

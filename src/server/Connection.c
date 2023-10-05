@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include "Util.h"
+#include "Log.h"
 
 ClientShared shared;
 
@@ -27,7 +28,10 @@ ClientShared * InitializeShared(map * users_map, size_t send_buffer_size, size_t
 void * StartUpdateThread(void * parameter)
 {
     while(shared.shutting_down == 0) {
+        pthread_mutex_lock(&(shared.mutex));
         sleep(1);
+        shared.dirty = 0;
+        pthread_mutex_unlock(&(shared.mutex));
         // update the registered file 
 
     }
@@ -60,7 +64,7 @@ void * StartConnectionThread(void * p_connection)
         } else {
             User * user = (User *) result.data;
             if(user->connected) {
-                printYellow("User %s attempted to double connect from IP %s.\n", connection->user->id, inet_ntoa(connection->address.sin_addr));
+                printYellow("User %s attempted to double connect from IP %s.\n", user->id, inet_ntoa(connection->address.sin_addr));
                 strcpy(send_buffer, "~Error~You are already connected.");
                 MessageAndClose(send_buffer, connection);
                 // send the other connected user an informative message?
@@ -74,15 +78,37 @@ void * StartConnectionThread(void * p_connection)
                 }                
             }
         }
-    }
+    } 
 
+    if(connection->state == ClientState_ACCESSING) {
+        strcpy(send_buffer, "~Message~Say something, unregistered user!");
+    } else {
+        strcpy(send_buffer, "~Message~Say something, registered user!");
+    }
 
     while(connection->status == ConnectionStatus_ACTIVE)
     {
         if(connection->state == ClientState_ACCESSING) {
+            MessageOrClose(send_buffer, receive_buffer, connection);
+
+            if(strcmp(receive_buffer, "HELP")) {
+                _help(connection, send_buffer);
+            } else if(strcmp(receive_buffer, "EXIT")) {
+                _disconnect(connection, send_buffer); //I'm mixed on this being it's own functions
+                MessageAndClose(send_buffer, connection);
+            } else if(strcmp(receive_buffer, "REGISTER")) {
+                _register(connection, send_buffer);
+            } else {
+                strcpy(send_buffer, "invalid command, use HELP for list of commands");
+            }
             // call a function for processing this state.
         } else if(connection->state == ClientState_REGISTERED)
         {
+            MessageOrClose(send_buffer, receive_buffer, connection);
+            strcpy(send_buffer, "~Message~I received '");
+            strcat(send_buffer, receive_buffer);
+            strcat(send_buffer, "`... goodbye!");
+            MessageAndClose(send_buffer, connection);
             // call a function for processing this state.
         } else {
             printRed("Client entered invalid state. Disconnecting. \n");
@@ -100,6 +126,9 @@ void * StartConnectionThread(void * p_connection)
     free(send_buffer);
     free(receive_buffer);
     close(connection->socket);
+    if(connection->user != NULL) {
+        connection->user->connected = 0;
+    }
     connection->status = ConnectionStatus_CLOSED;
     return NULL;
 }
@@ -108,20 +137,20 @@ void * StartConnectionThread(void * p_connection)
 int MessageOrClose(char * send_buffer, char * receive_buffer, Connection * connection) {
     memset(receive_buffer, 0, shared.receive_buffer_size);
     if(send(connection->socket, send_buffer, shared.send_buffer_size, 0) < 0) {
-        printRed("Failed to send message to %d. Disconnecting.\n", inet_ntoa(connection->address.sin_addr));
+        printRed("Failed to send message to %s. Disconnecting.\n", inet_ntoa(connection->address.sin_addr));
         perror("Error:");
         connection->status = ConnectionStatus_CLOSING;
         return 0;
     }
     int received_size = recv(connection->socket, receive_buffer, shared.receive_buffer_size, 0);
     if(received_size < 0) {
-        printRed("Failed to receive message from %d. Disconnecting.\n", inet_ntoa(connection->address.sin_addr));
+        printRed("Failed to receive message from %s. Disconnecting.\n", inet_ntoa(connection->address.sin_addr));
         perror("Error: ");
         connection->status = ConnectionStatus_CLOSING;
         return 0;
     }
     if(received_size == 0 ) {
-        printBlue("%d disconnected.", inet_ntoa(connection->address.sin_addr));
+        printBlue("%s disconnected.\n", inet_ntoa(connection->address.sin_addr));
         connection->status = ConnectionStatus_CLOSING;
         return 0;
     }
@@ -133,6 +162,59 @@ void MessageAndClose(char * send_buffer, Connection * connection) {
     strcat(send_buffer, "~Disconnect~");
     send(connection->socket, send_buffer, shared.send_buffer_size, 0);
     connection->status = ConnectionStatus_CLOSING;
+}
+
+int _disconnect(Connection* connection, char* response) {
+    //TODO add functionality
+    return 0;
+}
+
+int _help(Connection* connection, char* response) {
+    if(connection->status == ClientState_REGISTERED) {
+        strcpy(response, "~Message~HELP - get a list of available commands\n");
+        strcat(response, "REGISTER - register your user\n");
+        strcat(response, "EXIT - disconnect from the server\n");
+    } else if(connection->status == ClientState_REGISTERED) {
+        strcpy(response, "~Message~HELP - get a list of available commands\n");
+        strcat(response, "EXIT - disconnect from the server\n");
+        strcat(response, "MYINFO - get info about yourself\n");
+    }
+}
+
+int _register(Connection * connection, char* response) {
+    if(connection->user->registered) {
+        strcpy(response, "~Error~");
+        strcat(response, connection->user->id);
+        strcat(response, " is already registered.\n");
+
+        LogfError("%s from ip %s has attempted to register a second time.\n", connection->user->id, inet_ntoa(connection->address.sin_addr));
+        return 0;
+    }
+
+    pthread_mutex_lock(&(shared.mutex));
+    
+    connection->user->registered = 1;
+    shared.dirty = 1;
+
+    connection->user->age = RandomInteger(18, 22);
+
+    if(RandomFlag(.4)) {
+        connection->user->gpa = 4.0;
+    } else {
+        connection->user->gpa = RandomFloat(2.5, 4);
+    }
+
+    connection->state = ClientState_REGISTERED;
+
+    LogfInfo("%s has been restered.\n", connection->user->id);
+
+    pthread_mutex_unlock(&(shared.mutex));
+
+    strcpy(response, "~Message~");
+    strcat(response, connection->user);
+    strcat(response, " was registered.\n");
+
+    return 1;
 }
 
 /**
