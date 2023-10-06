@@ -13,7 +13,7 @@
 */
 
 /**
- * @brief These define the levels that a log can be printed ad
+ * @brief These define the levels that a log can be printed as
  * 
  */
 #define TRACE 0
@@ -41,48 +41,48 @@ typedef struct
 /**
  * @brief Logs at a FATAL level the formatted string and parameters of the string
  * 
- * @param format formated string
- * @param ... what to put in the formated string
+ * @param format formatted string
+ * @param ... what to put in the formatted string
  */
 void LogfFatal(const char * format, ...);
 
 /**
  * @brief Logs at an ERROR level the formatted string and parameters of the string
  * 
- * @param format formated string
- * @param ... what to put in the formated string
+ * @param format formatted string
+ * @param ... what to put in the formatted string
  */
 void LogfError(const char * format, ...);
 
 /**
  * @brief Logs at a WARNING level the formatted string and parameters of the string
  * 
- * @param format formated string
- * @param ... what to put in the formated string
+ * @param format formatted string
+ * @param ... what to put in the formatted string
  */
 void LogfWarning(const char * format, ...);
 
 /**
  * @brief Logs at a INFO level the formatted string and parameters of the string
  * 
- * @param format formated string
- * @param ... what to put in the formated string
+ * @param format formatted string
+ * @param ... what to put in the formatted string
  */
 void LogfInfo(const char * format, ...);
 
 /**
  * @brief Logs at a DEBUG level the formatted string and parameters of the string
  * 
- * @param format formated string
- * @param ... what to put in the formated string
+ * @param format formatted string
+ * @param ... what to put in the formatted string
  */
 void LogfDebug(const char* format, ...);
 
 /**
  * @brief Logs at a TRACE level the formatted string and parameters of the string
  * 
- * @param format formated string
- * @param ... what to put in the formated string
+ * @param format formatted string
+ * @param ... what to put in the formatted string
  */
 void LogfTrace(const char * format, ...);
 
