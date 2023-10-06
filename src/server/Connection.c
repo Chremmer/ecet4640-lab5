@@ -88,28 +88,37 @@ void * StartConnectionThread(void * p_connection)
 
     while(connection->status == ConnectionStatus_ACTIVE)
     {
+        //This is very repetitive, do we need separate separate paths for registered/unregistered?
+        //I wonder if it'd be better to have the same commands, but they do different actions based on registered/unregistered
         if(connection->state == ClientState_ACCESSING) {
-
             MessageOrClose(send_buffer, receive_buffer, connection);
-            if(strcmp(receive_buffer, "HELP") == 0) {
+            if (strcmp(receive_buffer, "HELP") == 0) {
                 _help(connection, send_buffer);
-            } else if(strcmp(receive_buffer, "EXIT") == 0) {
+            } else if (strcmp(receive_buffer, "EXIT") == 0) {
                 _disconnect(connection, send_buffer); //I'm mixed on this being it's own functions
                 MessageAndClose(send_buffer, connection);
-            } else if(strcmp(receive_buffer, "REGISTER") == 0) {
+            } else if (strcmp(receive_buffer, "REGISTER") == 0) {
                 _register(connection, send_buffer);
+            } else {
+                strcpy (send_buffer, "invalid command, use HELP for list of commands");
+            }
+            strcat(send_buffer, "\nInput Command:");
+            // call a function for processing this state.
+        } else if(connection->state == ClientState_REGISTERED) {
+            MessageOrClose(send_buffer, receive_buffer, connection);
+            if (strcmp(receive_buffer, "HELP") == 0) {
+                _help(connection, send_buffer);
+            } else if (strcmp(receive_buffer, "EXIT") == 0) {
+                _disconnect(connection, send_buffer); //I'm mixed on this being it's own functions
+                MessageAndClose(send_buffer, connection);                
+            } else if (strcmp(receive_buffer, "REGISTER") == 0) {
+                _register(connection, send_buffer);
+            } else if (strcmp(receive_buffer, "MYINFO") == 0) {
+                _myinfo(connection, send_buffer);
             } else {
                 strcpy(send_buffer, "invalid command, use HELP for list of commands");
             }
             strcat(send_buffer, "\nInput Command:");
-            // call a function for processing this state.
-        } else if(connection->state == ClientState_REGISTERED)
-        {
-            MessageOrClose(send_buffer, receive_buffer, connection);
-            strcpy(send_buffer, "~Message~I received '");
-            strcat(send_buffer, receive_buffer);
-            strcat(send_buffer, "`... goodbye!");
-            MessageAndClose(send_buffer, connection);
             // call a function for processing this state.
         } else {
             printRed("Client entered invalid state. Disconnecting. \n");
@@ -171,11 +180,11 @@ int _disconnect(Connection* connection, char* response) {
 }
 
 void _help(Connection* connection, char* response) {
-    if(connection->status != ClientState_REGISTERED) {
+    if(connection->state != ClientState_REGISTERED) {
         strcpy(response, "~Message~HELP - get a list of available commands\n");
         strcat(response, "REGISTER - register your user\n");
         strcat(response, "EXIT - disconnect from the server\n");
-    } else if(connection->status == ClientState_REGISTERED) {
+    } else if(connection->state == ClientState_REGISTERED) {
         strcpy(response, "~Message~HELP - get a list of available commands\n");
         strcat(response, "EXIT - disconnect from the server\n");
         strcat(response, "MYINFO - get info about yourself\n");
@@ -183,6 +192,9 @@ void _help(Connection* connection, char* response) {
 }
 
 int _register(Connection * connection, char* response) {
+    //Just wanted to see logging in action
+    InitializeLogger(stdout, 0, 0, 0);
+    
     if(connection->user->registered) {
         strcpy(response, "~Error~");
         strcat(response, connection->user->id);
@@ -207,7 +219,7 @@ int _register(Connection * connection, char* response) {
 
     connection->state = ClientState_REGISTERED;
 
-    //LogfInfo("%s has been restered.\n", connection->user->id);
+    LogfInfo("%s has been registered.\n", connection->user->id);
 
     pthread_mutex_unlock(&(shared.mutex));
 
@@ -216,6 +228,28 @@ int _register(Connection * connection, char* response) {
     strcat(response, " was registered.\n");
 
     return 1;
+}
+
+int _myinfo(Connection* connection, char* response) {
+    InitializeLogger(stdout, 0, 0, 0);
+    
+    if (!(connection->user->registered)) {
+        strcpy(response, "~Error~");
+        strcat(response, connection->user->id);
+        strcat(response, " is not registered.\n");
+
+        LogfError("%s from ip %s has attempted to view their information as an unregistered user.\n", connection->user->id, inet_ntoa(connection->address.sin_addr));
+
+        return 1;
+    }
+
+    //Referenced snprintf from https://cplusplus.com/reference/cstdio/snprintf/
+    //This line is way too long, but snprintf starts at the beginning of the buffer each time it is called. Maybe something else is needed.
+    snprintf(response, shared.send_buffer_size, "~Message~Your information:\nName: %s\nAge: %d\nGPA: %.2f\nIP Address: %s\n", connection->user->name, connection->user->age, connection->user->gpa, inet_ntoa(connection->address.sin_addr));
+
+    LogfInfo("%s viewed their information.\n", connection->user->id);
+
+    return 0;
 }
 
 /**
