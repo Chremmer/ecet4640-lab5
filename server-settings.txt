@@ -5,4 +5,5 @@ backlog             = 10
 max_connections     = 20
 log_file            = log.txt
 log_level           = 1
+print_level         = 1
 log_to_console      = true

@@ -95,21 +95,18 @@ void * StartConnectionThread(void * p_connection)
             if (strcmp(receive_buffer, "HELP") == 0) {
                 _help(connection, send_buffer);
             } else if (strcmp(receive_buffer, "EXIT") == 0) {
-                _disconnect(connection, send_buffer); //I'm mixed on this being it's own functions
                 MessageAndClose(send_buffer, connection);
             } else if (strcmp(receive_buffer, "REGISTER") == 0) {
                 _register(connection, send_buffer);
             } else {
                 strcpy (send_buffer, "invalid command, use HELP for list of commands");
             }
-            strcat(send_buffer, "\nInput Command:");
             // call a function for processing this state.
         } else if(connection->state == ClientState_REGISTERED) {
             MessageOrClose(send_buffer, receive_buffer, connection);
             if (strcmp(receive_buffer, "HELP") == 0) {
                 _help(connection, send_buffer);
             } else if (strcmp(receive_buffer, "EXIT") == 0) {
-                _disconnect(connection, send_buffer); //I'm mixed on this being it's own functions
                 MessageAndClose(send_buffer, connection);                
             } else if (strcmp(receive_buffer, "REGISTER") == 0) {
                 _register(connection, send_buffer);
@@ -118,7 +115,6 @@ void * StartConnectionThread(void * p_connection)
             } else {
                 strcpy(send_buffer, "invalid command, use HELP for list of commands");
             }
-            strcat(send_buffer, "\nInput Command:");
             // call a function for processing this state.
         } else {
             printRed("Client entered invalid state. Disconnecting. \n");
@@ -174,11 +170,6 @@ void MessageAndClose(char * send_buffer, Connection * connection) {
     connection->status = ConnectionStatus_CLOSING;
 }
 
-int _disconnect(Connection* connection, char* response) {
-    //TODO add functionality
-    return 0;
-}
-
 void _help(Connection* connection, char* response) {
     if(connection->state != ClientState_REGISTERED) {
         strcpy(response, "~Message~HELP - get a list of available commands\n");
@@ -192,8 +183,6 @@ void _help(Connection* connection, char* response) {
 }
 
 int _register(Connection * connection, char* response) {
-    //Just wanted to see logging in action
-    InitializeLogger(stdout, 0, 0, 0);
     
     if(connection->user->registered) {
         strcpy(response, "~Error~");
