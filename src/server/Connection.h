@@ -129,6 +129,32 @@ void _help(Connection* connection, char* response);
  * @return int 1 if successful, 0 if not
  */
 int _myinfo(Connection* connection, char* response);
+
+/**
+ * Sets response buffer to be a list a userIDs that are connected.
+ * 
+ * @param response fills the response buffer with what to send to the client
+ * @return int 1 if successful, 0 if not
+ */
+void _who(char* response);
+
+/**
+ * Randomly changes the age of the user
+ * 
+ * @param connection connection the user is on
+ * @param response fills the response buffer with what to send to the client
+ * @return int 1 if successful, 0 if not
+ */
+void _rand_age(Connection* connection, char* response);
+
+/**
+ * Randomly changes the gpa of the user
+ * 
+ * @param connection connection the user is on
+ * @param response fills the response buffer with what to send to the client
+ * @return int 1 if successful, 0 if not
+ */
+void _rand_gpa(Connection* connection, char* response);
 /**
  * @}
 */
