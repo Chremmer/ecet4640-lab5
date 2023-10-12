@@ -7,7 +7,7 @@
 */
 #include <stdint.h>
 #include <time.h>
-#include "Map.h"
+#include "map.h"
 #include "Connection.h"
 
 /**
