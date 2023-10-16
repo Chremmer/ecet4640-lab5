@@ -116,6 +116,8 @@ void * StartConnectionThread(void * p_connection)
                 _who(send_buffer);
             } else if(strcmp(receive_buffer, "random-gpa") == 0) {
                 _rand_gpa(connection, send_buffer);
+            } else if(strcmp(receive_buffer, "random-age") == 0) {
+                _rand_age(connection, send_buffer);
             } else {
                 strcpy(send_buffer, "<Error>Invalid command, use 'help' for list of commands");
             }
@@ -281,6 +283,18 @@ void _rand_gpa(Connection* connection, char* response) {
     sprintf(gpa_str, "%.2f", connection->user->gpa);
     strcat(response, "<User.GPA>");
     strcat(response, gpa_str);
+}
+
+void _rand_age(Connection* connection, char * response) {
+    char age_str[5];
+    pthread_mutex_lock(&(shared.mutex));
+    connection->user->age = RandomInteger(18, 22);
+    shared.dirty = 1;
+    pthread_mutex_unlock(&(shared.mutex));
+
+    sprintf(age_str, "%d", connection->user->age);
+    strcat(response, "<User.AGE>");
+    strcat(response, age_str);
 }
 
 /**
