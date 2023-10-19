@@ -70,7 +70,6 @@ typedef struct {
 */
 ClientShared * InitializeShared(map * users_map, size_t send_buffer_size, size_t receive_buffer_size);
 
-
 /** Starts a connection thread
  * @param connection A pointer to a Connection structure from the server's connections array.
  * @returns NULL

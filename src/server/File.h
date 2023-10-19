@@ -82,6 +82,19 @@ int ReadSettingsFileIntoSettingsMap(FILE * settings_file, map * settings_map);
  */
 void UpdateRegisteredFileFromUsersMap(FILE * reg_file, map * users_map);
 
+/***
+    Creates a lockfile.
+    @warning This should only be called by a running server process when a lockfile does not already exist.
+    @returns 1 on success, otherwise 0.
+*/
+int CreateLockfile();
+
+/***
+    Deletes a lockfile.
+    @returns 1 on success, otherwise 0.
+*/
+int DeleteLockfile();
+
 /**
  * @}
 */

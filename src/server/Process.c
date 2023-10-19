@@ -4,6 +4,9 @@
 */
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include "Data.h"
 #include "Build.h"
 #include "map.h"
@@ -11,6 +14,7 @@
 #include "Util.h"
 #include "Server.h"
 #include "Log.h"
+#include "Connection.h"
 
 /** The array of users. This will be populated on initialize by functions in Build. */
 User * users_array;
@@ -142,11 +146,32 @@ int Initialize() {
     return 1;
 }
 
+void SignalHandle(int signo) {
+    if(signo == SIGINT || signo == SIGTERM) {
+        printYellow("Received signal. Shutting down server.\n");
+        DeleteLockfile();
+        exit(0);
+    }
+
+}
+
 int RunCommand() {
+    if (FileStatus(LOCKFILE) > 0)
+    {
+        printf("Server process already running.\n");
+        return 0;
+    }
+    signal(SIGTERM, SignalHandle);
+    signal(SIGINT, SignalHandle);
+    int lockfile_success = CreateLockfile();
+    if(!lockfile_success) {
+        printRed("Failed to create Lockfile! Server cannot start.");
+        return 0;
+    }
     int init_success = Initialize();
     if(!init_success) {
         printRed("Could not start the server due to failed initialization.\n");
-        return init_success;
+        return 0;
     }
     printf("Running server.\n");
     int server_success = StartServer(users_map);
@@ -154,8 +179,81 @@ int RunCommand() {
         printRed("There was a problem running the server.\n");
         return 0;
     }
-    return 1;
-    
+    int delete_lockfile_success = DeleteLockfile();
+    if(!delete_lockfile_success) {
+        printRed("There was a problem deleting the Lockfile.\n");
+        return 0;
+    }
+    return 1;   
+}
+
+void RunHeadless(char *processName) {
+    if (FileStatus(LOCKFILE) > 0)
+    {
+        printf("Server process already running.\n");
+        return;
+    }
+    char commandFront[] = " nohup ";
+    char commandEnd[] = " & exit";
+    size_t comm_length = strlen(commandFront) + strlen(commandEnd) + strlen(processName) + 1;
+    char *commandFull = malloc(comm_length * sizeof(char));
+    memset(commandFull, 0, comm_length * sizeof(char));
+    strcpy(commandFull, commandFront);
+    strcat(commandFull, processName);
+    strcat(commandFull, commandEnd);
+
+    printf("Executing: %s\n", commandFull);
+    popen(commandFull, "we");
+    printf("Server running headlessly.\n");
+}
+
+int TerminateExistingServer()
+{
+    FILE *file = fopen(LOCKFILE, "r");
+    if (file == NULL)
+    {
+        perror("Error opening lockfile");
+        return -1;
+    }
+    int need_rewrite;
+    int pid = 0;
+    fscanf(file, "%d %d", &need_rewrite, &pid);
+    fclose(file);
+    if (pid > 0)
+    {
+        return kill(pid, SIGTERM);
+    }
+    return -2;
+}
+
+void StopCommand() {
+    printYellow("\nStopping server...\n");
+    int err = TerminateExistingServer();
+    if (err)
+    {
+        if (err == -1)
+        {
+            printRed("Server isn't running.\n");
+        }
+        else if (err == -2)
+        {
+            printRed("Lockfile did not contain a valid process id!\n");
+        }
+        else
+        {
+            printRed("Sending terminate signal failed!\n");
+        }
+    }
+    else
+    {
+        printGreen("Server terminated.\n");
+    }
+}
+
+void ResetCommand() {
+    if(FileStatus(REGISTERED_FILE)) {
+        fclose(fopen(REGISTERED_FILE, "w")); //empties the registered file
+    }
 }
 /**
  * @}

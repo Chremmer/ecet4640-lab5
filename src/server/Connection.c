@@ -38,7 +38,7 @@ void * StartUpdateThread(void * parameter)
                 UpdateRegisteredFileFromUsersMap(reg_file, shared.users);
                 fclose(reg_file);
             } else {
-                LogfError("FAILED OPEN REGISTERED FILE - NO DATA WILL BE UPDATED");
+                LogfError("FAILED TO OPEN REGISTERED FILE - NO DATA WILL BE UPDATED");
                 shared.dirty = 1;
             }
             pthread_mutex_unlock(&(shared.mutex));
@@ -100,8 +100,6 @@ void * StartConnectionThread(void * p_connection)
 
     while(connection->status == ConnectionStatus_ACTIVE)
     {
-        //This is very repetitive, do we need separate separate paths for registered/unregistered?
-        //I wonder if it'd be better to have the same commands, but they do different actions based on registered/unregistered
         if(connection->state == ClientState_ACCESSING) {
             MessageOrClose(send_buffer, receive_buffer, connection);
             if (strcmp(receive_buffer, "help") == 0) {
@@ -143,6 +141,9 @@ void * StartConnectionThread(void * p_connection)
 
     if(connection->user != NULL) {
         connection->user->connected = 0;
+        LogfInfo("User %s from ip %s disconnected.\n", connection->user->id, connection->user->ip);
+    } else {
+        LogfInfo("Ip %s disconnected.\n", inet_ntoa(connection->address.sin_addr));
     }
     
 
@@ -200,11 +201,11 @@ void _help(Connection* connection, char* response) {
         strcat(response, "register - register your user\n");
         strcat(response, "exit - disconnect from the server");
     } else if(connection->state == ClientState_REGISTERED) {
-        strcpy(response, "<Message>h lp- get a list of available commands\n");
+        strcpy(response, "<Message>help- get a list of available commands\n");
         strcat(response, "exit - disconnect from the server\n");
-        strcat(response, "who - get a list of online users.\n");
-        strcat(response, "random-gpa - set your gpa to a new random value.\n");
-        strcat(response, "random-age - set your age to aa new random value.\n");
+        strcat(response, "who - get a list of online users\n");
+        strcat(response, "random-gpa - set your gpa to a new random value\n");
+        strcat(response, "random-age - set your age to a new random value\n");
         strcat(response, "advertisement - get a colorful advertisement\n");
         strcat(response, "myinfo - get info about yourself");
     }
@@ -260,7 +261,6 @@ int _myinfo(Connection* connection, char* response) {
     }
 
     //Referenced snprintf from https://cplusplus.com/reference/cstdio/snprintf/
-    //This line is way too long, but snprintf starts at the beginning of the buffer each time it is called. Maybe something else is needed.
     snprintf(response, shared.send_buffer_size, "<User.Name>%s<User.Age>%d<User.GPA>%.2f<User.IP>%s", connection->user->name, connection->user->age, connection->user->gpa, inet_ntoa(connection->address.sin_addr));
 
     LogfInfo("%s viewed their information.\n", connection->user->id);
@@ -306,7 +306,7 @@ void _rand_age(Connection* connection, char * response) {
     pthread_mutex_unlock(&(shared.mutex));
 
     sprintf(age_str, "%d", connection->user->age);
-    strcat(response, "<User.AGE>");
+    strcat(response, "<User.Age>");
     strcat(response, age_str);
 }
 

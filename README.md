@@ -3,15 +3,15 @@
 Instructions for this assignment are located [at this link](https://students.calu.edu/calupa/chen/ecet4640/lab/phase2cs.html)
 
 ## Some todos
-- log when client disconnects, log user if extant
+- ~~log when client disconnects, log user if extant~~
 - implement advertisement
-- implement registered users files
-- implement lockfile
-- implement command line args
+- ~~implement registered users files~~
+- ~~implement lockfile~~
+- ~~implement command line args~~
     - 'headless' command again, to ./nohup itself
     - stop command
     - reset command
-- implement interrupt signals, sigterm signals, for graceful shutdown (write lockfile, ensure text is normal color)
+- ~~implement interrupt signals, sigterm signals, for graceful shutdown (write lockfile, ensure text is normal color)~~
 - logging to logfile?
 
 - Note: the server IP is: 158.83.254.100   but it doesn't appear we can expose ports currently. Should talk to Prof. chen about this. 

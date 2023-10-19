@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "File.h"
 #include "Data.h"
 #include "Util.h"
@@ -145,6 +146,22 @@ int ReadSettingsFileIntoSettingsMap(FILE * settings_file, map * settings_map) {
         return 1;
     }
     return 0;
+}
+
+int CreateLockfile()
+{
+    FILE * file = fopen(LOCKFILE, "w");
+    if(file == NULL) {
+        return 0;
+    }
+    fprintf(file, "0 %d", getpid());
+    fclose(file);
+    return 1;
+}
+
+int DeleteLockfile()
+{
+    return remove(LOCKFILE);
 }
 
 /**

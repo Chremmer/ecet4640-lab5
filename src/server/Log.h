@@ -87,10 +87,11 @@ void LogfDebug(const char* format, ...);
 void LogfTrace(const char * format, ...);
 
 /**
- * @brief Instaiates the logger settings to run off of, must be called before logging can occur
+ * @brief Instantiates the logger settings to run off of, must be called before logging can occur
  * 
  * @param _printStream output stream to print at
  * @param outputLevel mimumum level needed to print to the printstream
+ * @param logLevel minimum level needed to print to log file
  * @param printAllToStdOut will print everyting to stdout if not set to 0 as well as _printStream
  */
 void InitializeLogger(FILE* _printStream, char printLevel, char logLevel, char printAllToStdOut);
