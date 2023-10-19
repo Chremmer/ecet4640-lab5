@@ -189,7 +189,9 @@ void MessageAndClose(char * send_buffer, Connection * connection) {
     strcat(send_buffer, "<Disconnect>");
     send(connection->socket, send_buffer, shared.send_buffer_size, 0);
     connection->status = ConnectionStatus_CLOSING;
-    connection->user->connected = 0;
+    if(connection -> user != NULL) {
+        connection->user->connected = 0;
+    }
 }
 
 void _help(Connection* connection, char* response) {
