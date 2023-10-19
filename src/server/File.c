@@ -10,6 +10,7 @@
 #include "File.h"
 #include "Data.h"
 #include "Util.h"
+#include "Log.h"
 
 short FileStatus(char * filename) {
     int err = access(filename, F_OK);
@@ -102,6 +103,22 @@ int ReadRegisteredFileIntoUsersMap(FILE * reg_file, map * users_map) {
         return 1;
     }
     return 0;
+}
+
+void UpdateRegisteredFileFromUsersMap(FILE * reg_file, map * users_map) {
+    int i;
+    for(i = 0; i < RECORD_COUNT; i++) {
+        map_result result = Map_Get(users_map, accepted_userIDs[i]);
+        if(!result.found) {
+            LogfError("User %s was not found in users map.", accepted_userIDs[i]);
+            continue;
+        }
+
+        User * user = (User *) result.data;
+        if(user->registered) {
+            fprintf(reg_file, "%s\t%d\t%f\t%s\t%ld", user->id, user->age, user->gpa, user->ip, user->lastConnection);
+        }
+    }
 }
 
 int ReadSettingsFileIntoSettingsMap(FILE * settings_file, map * settings_map) {

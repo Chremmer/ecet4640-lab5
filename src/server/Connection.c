@@ -12,6 +12,7 @@
 #include "Util.h"
 #include "Log.h"
 #include "Data.h"
+#include "File.h"
 
 ClientShared shared;
 
@@ -29,11 +30,20 @@ ClientShared * InitializeShared(map * users_map, size_t send_buffer_size, size_t
 void * StartUpdateThread(void * parameter)
 {
     while(shared.shutting_down == 0) {
-        pthread_mutex_lock(&(shared.mutex));
-        shared.dirty = 0;
-        pthread_mutex_unlock(&(shared.mutex));
+        if(shared.dirty) {
+            pthread_mutex_lock(&(shared.mutex));
+            shared.dirty = 0;
+            FILE * reg_file = CreateOrOpenFileVerbose(REGISTERED_FILE, NULL);
+            if(reg_file != NULL) {
+                UpdateRegisteredFileFromUsersMap(reg_file, shared.users);
+                fclose(reg_file);
+            } else {
+                LogfError("FAILED OPEN REGISTERED FILE - NO DATA WILL BE UPDATED");
+                shared.dirty = 1;
+            }
+            pthread_mutex_unlock(&(shared.mutex));
+        }
         sleep(1);
-        /// @todo update the registered file 
 
     }
     return NULL;
@@ -72,6 +82,7 @@ void * StartConnectionThread(void * p_connection)
             } else {
                 connection->user = user;
                 connection->user->connected = 1;
+                strcpy(connection->user->ip, inet_ntoa(connection->address.sin_addr));
                 if(connection->user->registered) {
                     connection->state = ClientState_REGISTERED;
                 } else {
@@ -211,7 +222,6 @@ int _register(Connection * connection, char* response) {
     pthread_mutex_lock(&(shared.mutex));
     
     connection->user->registered = 1;
-    shared.dirty = 1;
 
     connection->user->age = RandomInteger(18, 22);
 
@@ -225,6 +235,7 @@ int _register(Connection * connection, char* response) {
 
     LogfDebug("%s has been registered.\n", connection->user->id);
 
+    shared.dirty = 1;
     pthread_mutex_unlock(&(shared.mutex));
 
     strcpy(response, "<Message>You Have been registered ");

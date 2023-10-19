@@ -74,8 +74,13 @@ int ReadRegisteredFileIntoUsersMap(FILE * reg_file, map * users_map);
 */
 int ReadSettingsFileIntoSettingsMap(FILE * settings_file, map * settings_map);
 
-
-
+/**
+ * @brief Updates the registered file with of all users from user map that are marked as registered
+ * 
+ * @param reg_file file to update to
+ * @param users_map the map of users to use to update
+ */
+void UpdateRegisteredFileFromUsersMap(FILE * reg_file, map * users_map);
 
 /**
  * @}
