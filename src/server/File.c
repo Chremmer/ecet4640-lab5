@@ -95,6 +95,7 @@ int ReadRegisteredFileIntoUsersMap(FILE * reg_file, map * users_map) {
         user->gpa = user_gpa;
         strcpy(user->ip, userLastIP);
         user->lastConnection = lastConnection;
+        user->registered = 1;
         line++;
     } 
 
