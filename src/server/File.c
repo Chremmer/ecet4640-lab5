@@ -133,7 +133,9 @@ int NumberOfFilesInDirectory(char* dir_name) {
     dirp = opendir(dir_name);
 
     while((entry = readdir(dirp)) != NULL) {
-        count++;
+        if(entry->d_type == DT_REG) {
+            count++;
+        }
     }
 
     closedir(dirp);
@@ -142,19 +144,23 @@ int NumberOfFilesInDirectory(char* dir_name) {
 }
 
 void GetRandomFileNameFromDir(char * dir_name, char* file_name) {
+    printGreen("Directory %s had %d files\n", dir_name, NumberOfFilesInDirectory(dir_name));
     int file = RandomInteger(0, NumberOfFilesInDirectory(dir_name) - 1);
 
     DIR* dirp = opendir(dir_name);
     struct dirent * entry;
 
     while(file >= 0 && ((entry = readdir(dirp)) != NULL)) {
-        file--;
+        if(entry->d_type == DT_REG) {
+            file--;
+        }
     }
 
     if(entry != NULL) {
         strcpy(file_name, entry->d_name);
     }
 
+    printBlue("%s\n", file_name);
     closedir(dirp);
 }
 
@@ -183,14 +189,16 @@ int ReadSettingsFileIntoSettingsMap(FILE * settings_file, map * settings_map) {
     return 0;
 }
 
-void CatFileToBuffer(char* file_name, char* response) {
+void CatFileToBuffer(char* file_name, char* buffer, size_t buffer_size) {
     if(FileStatus(file_name)) {
         FILE* file = CreateOrOpenFileVerbose(file_name, NULL);
-        char temp[1024];
+        char* temp = malloc(buffer_size);
         
-        while(fgets(temp, 1024, file)) {
-            strcat(response, temp);
+        while(fgets(temp, buffer_size - strlen(buffer), file) && buffer_size - strlen(buffer) > 1) {
+            strcat(buffer, temp);
         }
+
+        free(temp);
     }
 }
 

@@ -106,12 +106,13 @@ void GetRandomFileNameFromDir(char* dir_name, char* file_name);
 int NumberOfFilesInDirectory(char* dir_name);
 
 /**
- * @brief Concatinates the contents of file_name into the response tring
+ * @brief Concatinates the contents of file_name into the buffer string
  * 
  * @param file_name file to concatinate
- * @param response string to copy it to
+ * @param buffer string to copy it to
+ * @param buffer_size max size of buffer
  */
-void CatFileToBuffer(char* file_name, char* response);
+void CatFileToBuffer(char* file_name, char* buffer, size_t buffer_size);
 
 /***
     Creates a lockfile.

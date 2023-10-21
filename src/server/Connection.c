@@ -315,17 +315,15 @@ void _rand_age(Connection* connection, char * response) {
 void _advertisement(Connection * connection, char * response) {
     char filename[FILENAME_MAX];
 
-    printYellow("Got Here 1\n");
     GetRandomFileNameFromDir(ADS_DIR, filename);
 
-    printYellow("Got Here2\n");
-    printYellow("Test Got Here 3\n");
     char* filepath = malloc(FILENAME_MAX + sizeof(ADS_DIR));
     strcpy(filepath, ADS_DIR);
     strcat(filepath, "/");
     strcat(filepath, filename);
 
-    CatFileToBuffer(filepath, response);
+    strcat(response, "<Message>");
+    CatFileToBuffer(filepath, response, shared.send_buffer_size);
 }
 /**
  * @}
