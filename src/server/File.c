@@ -144,7 +144,6 @@ int NumberOfFilesInDirectory(char* dir_name) {
 }
 
 void GetRandomFileNameFromDir(char * dir_name, char* file_name) {
-    printGreen("Directory %s had %d files\n", dir_name, NumberOfFilesInDirectory(dir_name));
     int file = RandomInteger(0, NumberOfFilesInDirectory(dir_name) - 1);
 
     DIR* dirp = opendir(dir_name);
@@ -160,7 +159,6 @@ void GetRandomFileNameFromDir(char * dir_name, char* file_name) {
         strcpy(file_name, entry->d_name);
     }
 
-    printBlue("%s\n", file_name);
     closedir(dirp);
 }
 
