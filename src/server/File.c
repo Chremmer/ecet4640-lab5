@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <dirent.h>
 #include "File.h"
 #include "Data.h"
 #include "Util.h"
@@ -123,6 +124,40 @@ void UpdateRegisteredFileFromUsersMap(FILE * reg_file, map * users_map) {
     }
 }
 
+int NumberOfFilesInDirectory(char* dir_name) {
+    int count = 0;
+    
+    DIR * dirp;
+    struct dirent * entry;
+
+    dirp = opendir(dir_name);
+
+    while((entry = readdir(dirp)) != NULL) {
+        count++;
+    }
+
+    closedir(dirp);
+
+    return count;
+}
+
+void GetRandomFileNameFromDir(char * dir_name, char* file_name) {
+    int file = RandomInteger(0, NumberOfFilesInDirectory(dir_name) - 1);
+
+    DIR* dirp = opendir(dir_name);
+    struct dirent * entry;
+
+    while(file >= 0 && ((entry = readdir(dirp)) != NULL)) {
+        file--;
+    }
+
+    if(entry != NULL) {
+        strcpy(file_name, entry->d_name);
+    }
+
+    closedir(dirp);
+}
+
 int ReadSettingsFileIntoSettingsMap(FILE * settings_file, map * settings_map) {
     char key_read[100];
     char value_read[100];
@@ -146,6 +181,17 @@ int ReadSettingsFileIntoSettingsMap(FILE * settings_file, map * settings_map) {
         return 1;
     }
     return 0;
+}
+
+void CatFileToBuffer(char* file_name, char* response) {
+    if(FileStatus(file_name)) {
+        FILE* file = CreateOrOpenFileVerbose(file_name, NULL);
+        char temp[1024];
+        
+        while(fgets(temp, 1024, file)) {
+            strcat(response, temp);
+        }
+    }
 }
 
 int CreateLockfile()

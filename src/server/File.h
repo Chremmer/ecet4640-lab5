@@ -37,6 +37,13 @@
 */
 #define SERVER_SETTINGS_FILE "server-settings.txt"
 
+/**
+ * Contains files of ascii art to sent to clients.
+ * 
+ * @note should be the relative directory to the file the ads are in
+ */
+#define ADS_DIR "ads"
+
 // ~~~~~ General File Functions ~~~~~ //
 
 /**
@@ -81,6 +88,30 @@ int ReadSettingsFileIntoSettingsMap(FILE * settings_file, map * settings_map);
  * @param users_map the map of users to use to update
  */
 void UpdateRegisteredFileFromUsersMap(FILE * reg_file, map * users_map);
+
+/**
+ * @brief Get the Random File Name From Dir object
+ * 
+ * @param dir_name name of the director to get a file name of
+ * @param file_name sets the name of the file into file_name
+ */
+void GetRandomFileNameFromDir(char* dir_name, char* file_name);
+
+/**
+ * @brief Finds the number of files/directories in a given directory
+ * 
+ * @param dir_name directory to count files from
+ * @return int number of files in the directory
+ */
+int NumberOfFilesInDirectory(char* dir_name);
+
+/**
+ * @brief Concatinates the contents of file_name into the response tring
+ * 
+ * @param file_name file to concatinate
+ * @param response string to copy it to
+ */
+void CatFileToBuffer(char* file_name, char* response);
 
 /***
     Creates a lockfile.

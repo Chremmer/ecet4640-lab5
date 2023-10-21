@@ -127,7 +127,9 @@ void * StartConnectionThread(void * p_connection)
                 _rand_gpa(connection, send_buffer);
             } else if(strcmp(receive_buffer, "random-age") == 0) {
                 _rand_age(connection, send_buffer);
-            } else {
+            } else if(strcmp(receive_buffer, "advertisement") == 0){
+                _advertisement(connection, send_buffer);
+            }else {
                 strcpy(send_buffer, "<Error>Invalid command, use 'help' for list of commands");
             }
             // call a function for processing this state.
@@ -310,6 +312,21 @@ void _rand_age(Connection* connection, char * response) {
     strcat(response, age_str);
 }
 
+void _advertisement(Connection * connection, char * response) {
+    char filename[FILENAME_MAX];
+
+    printYellow("Got Here 1\n");
+    GetRandomFileNameFromDir(ADS_DIR, filename);
+
+    printYellow("Got Here2\n");
+    printYellow("Test Got Here 3\n");
+    char* filepath = malloc(FILENAME_MAX + sizeof(ADS_DIR));
+    strcpy(filepath, ADS_DIR);
+    strcat(filepath, "/");
+    strcat(filepath, filename);
+
+    CatFileToBuffer(filepath, response);
+}
 /**
  * @}
 */

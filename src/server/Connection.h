@@ -116,7 +116,6 @@ int _register(Connection * connection, char* response);
  * 
  * @param connection connection the user is on
  * @param response fills the response buffer with what to send to the client
- * @return int 1 if successful, 0 if not
  */
 void _help(Connection* connection, char* response);
 
@@ -133,7 +132,6 @@ int _myinfo(Connection* connection, char* response);
  * Sets response buffer to be a list a userIDs that are connected.
  * 
  * @param response fills the response buffer with what to send to the client
- * @return int 1 if successful, 0 if not
  */
 void _who(char* response);
 
@@ -142,7 +140,6 @@ void _who(char* response);
  * 
  * @param connection connection the user is on
  * @param response fills the response buffer with what to send to the client
- * @return int 1 if successful, 0 if not
  */
 void _rand_age(Connection* connection, char* response);
 
@@ -151,9 +148,16 @@ void _rand_age(Connection* connection, char* response);
  * 
  * @param connection connection the user is on
  * @param response fills the response buffer with what to send to the client
- * @return int 1 if successful, 0 if not
  */
 void _rand_gpa(Connection* connection, char* response);
+
+/**
+ * @brief responds with a random ascii art
+ * 
+ * @param connection connection the user is on
+ * @param response fills the response buffer with what to send to the client
+ */
+void _advertisement(Connection * connection, char * response);
 /**
  * @}
 */
