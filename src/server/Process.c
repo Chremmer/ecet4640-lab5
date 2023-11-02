@@ -36,13 +36,13 @@ char * default_settings = "port                = 3000\n"
 int active_clients;
 
 int _initializeLogger() {
-    char* fileName = "log.txt";
-    int printLevel, LogLevel, printAlltoStdOut;
+    //char* fileName = "log.txt";
+    int printLevel, LogLevel;// printAlltoStdOut;
     map_result result = Map_Get(settings_map, "log_file");
     if(!result.found) {
         printYellow("No output file found. Defaulting to 'log.txt'\n");
     } else {
-        fileName = result.data;
+        //fileName = result.data;
     }
 
     result = Map_Get(settings_map, "print_level");
@@ -72,15 +72,15 @@ int _initializeLogger() {
     result = Map_Get (settings_map, "log_to_console");
     if(!result.found) {
         printYellow("No log_to_console found, defaulting to true\n");
-        printAlltoStdOut = 1;
+        //printAlltoStdOut = 1;
     } else {
         if(strcmp(result.data, "true") == 0) {
-            printAlltoStdOut = 1;
+            //printAlltoStdOut = 1;
         } else if(strcmp(result.data, "false") == 0) {
-            printAlltoStdOut = 0;
+            //printAlltoStdOut = 0;
         } else {
             printYellow("invalid data in log_to_console, defaulting to true\n");
-            printAlltoStdOut = 1;
+            //printAlltoStdOut = 1;
         }
     }
     return 1;

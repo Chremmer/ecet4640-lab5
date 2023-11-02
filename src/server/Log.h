@@ -7,6 +7,7 @@
  * \defgroup Log
  * \brief Handles logging; can be to the console or a file.
  * @{
+ * \details Log was initially going to also maintain a log.txt file that recorded user interactions with the server, but this feature was not finished. For now it just logs to the console.
  * 
  * @todo Be able to switch to file logging
  * @todo Be able to set log levels
@@ -47,6 +48,7 @@ typedef struct
 void LogfFatal(const char * format, ...);
 
 /**
+ *  Is used
  * @brief Logs at an ERROR level the formatted string and parameters of the string
  * 
  * @param format formatted string
