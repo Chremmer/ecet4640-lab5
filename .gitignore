@@ -56,3 +56,5 @@ Mkfile.old
 dkms.conf
 
 registered.txt
+
+docs/doxygen

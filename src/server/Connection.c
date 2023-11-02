@@ -58,12 +58,12 @@ void * StartConnectionThread(void * p_connection)
     // allocate send and receive buffers.
     char * send_buffer = malloc(shared.send_buffer_size);
     char * receive_buffer = malloc(shared.receive_buffer_size);
-    int bytes_received;
+    //int bytes_received;
     map_result result;
 
     // ask for their user ID initially, or disconnect them.
     strcpy(send_buffer, "<Message>Welcome. Please send your user ID.");
-    bytes_received = MessageOrClose(send_buffer, receive_buffer, connection);
+    MessageOrClose(send_buffer, receive_buffer, connection);
     if(connection->status == ConnectionStatus_ACTIVE) {
         result = Map_Get(shared.users, receive_buffer);
         if(!result.found)
